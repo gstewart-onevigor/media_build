@@ -342,7 +342,8 @@ sub check_snd_BUG_ON()
 sub check_bitops()
 {
 	my @files = ( "$kdir/include/linux/bitops.h",
-                  "$kdir/include/linux/bits.h" );
+                  "$kdir/include/linux/bits.h",
+		  "$kdir/include/vdso/bits.h" );
 
 	foreach my $file ( @files ) {
 		open IN, "<$file" or next;
@@ -622,7 +623,7 @@ sub check_other_dependencies()
 	check_files_for_func("kstrtou16", "NEED_KSTRTOU16", "include/linux/kernel.h");
 	check_files_for_func("kstrtoul", "NEED_KSTRTOUL", "include/linux/kernel.h");
 	check_files_for_func("memweight", "NEED_MEMWEIGHT", "include/linux/string.h");
-	check_files_for_func("dev_dbg_ratelimited", "NEED_DEV_DBG_RATELIMITED", "include/linux/device.h");
+	check_files_for_func("dev_dbg_ratelimited", "NEED_DEV_DBG_RATELIMITED", "include/linux/device.h", "include/linux/dev_printk.h");
 	check_files_for_func("i2c_probe_func_quick_read", "NEED_I2C_PROBE_FUNC_QUICK_READ", "include/linux/i2c.h");
 	check_files_for_func("abs64", "NEED_ABS64", "include/linux/kernel.h");
 	check_files_for_func("VM_DONTDUMP", "NEED_DONTDUMP", "include/linux/mm.h");
@@ -655,8 +656,8 @@ sub check_other_dependencies()
 	check_files_for_func("mp_mb__after_atomic", "NEED_SMP_MB_AFTER_ATOMIC", "include/asm-generic/barrier.h");
 	check_files_for_func("pci_zalloc_consistent", "NEED_PCI_ZALLOC_CONSISTENT", "include/asm-generic/pci-dma-compat.h", "include/linux/pci-dma-compat.h");
 	check_files_for_func("kref_get_unless_zero", "NEED_KREF_GET_UNLESS_ZERO", "include/linux/kref.h");
-	check_files_for_func("prandom_u32_max", "NEED_PRANDOM_U32_MAX", "include/linux/random.h");
-	check_files_for_func("prandom_u32", "NEED_PRANDOM_U32", "include/linux/random.h");
+	check_files_for_func("prandom_u32_max", "NEED_PRANDOM_U32_MAX", "include/linux/random.h", "include/linux/prandom.h");
+	check_files_for_func("prandom_u32", "NEED_PRANDOM_U32", "include/linux/random.h", "include/linux/prandom.h");
 	check_files_for_func("GENMASK", "NEED_GENMASK", "include/linux/bitops.h", "include/linux/bits.h");
 	check_files_for_func("mult_frac", "NEED_MULT_FRAC", "include/linux/kernel.h");
 	check_files_for_func("clk_prepare_enable", "NEED_CLOCK_HELPERS", "include/linux/clk.h");
@@ -686,8 +687,8 @@ sub check_other_dependencies()
 	check_files_for_func("ktime_get_boottime", "NEED_KTIME_GET_BOOTTIME", "include/linux/hrtimer.h", "include/linux/timekeeping.h");
 	check_files_for_func("BUS_CEC", "NEED_BUS_CEC", "include/uapi/linux/input.h");
 	check_files_for_func("smp_load_acquire", "NEED_SMP_LOAD_ACQUIRE", "include/asm-generic/barrier.h");
-	check_files_for_func("dev_err_once", "NEED_DEV_ERR_ONCE", "include/linux/device.h");
-	check_files_for_func("dev_warn_once", "NEED_DEV_WARN_ONCE", "include/linux/device.h");
+	check_files_for_func("dev_err_once", "NEED_DEV_ERR_ONCE", "include/linux/device.h", "include/linux/dev_printk.h");
+	check_files_for_func("dev_warn_once", "NEED_DEV_WARN_ONCE", "include/linux/device.h", "include/linux/dev_printk.h");
 	check_files_for_func("kthread_init_worker", "NEED_KTHREAD_INIT_WORKER", "include/linux/kthread.h");
 	check_files_for_func("print_hex_dump_debug", "NEED_PRINT_HEX_DUMP_DEBUG", "include/linux/printk.h");
 	check_files_for_func("min3", "NEED_MIN3", "include/linux/kernel.h");
@@ -704,7 +705,8 @@ sub check_other_dependencies()
 	check_files_for_func("pm_runtime_get_if_in_use", "NEED_PM_RUNTIME_GET", "include/linux/pm_runtime.h");
 	check_files_for_func("KEY_APPSELECT", "NEED_KEY_APPSELECT", "include/uapi/linux/input-event-codes.h");
 	check_files_for_func("PCI_DEVICE_SUB", "NEED_PCI_DEVICE_SUB", "include/linux/pci.h");
-	check_files_for_func("U32_MAX", "NEED_U32_MAX", "include/linux/kernel.h");
+	check_files_for_func("U32_MAX", "NEED_U32_MAX", "include/linux/kernel.h", "include/linux/limits.h");
+	check_files_for_func("U16_MAX", "NEED_U16_MAX", "include/linux/kernel.h", "include/linux/limits.h");
 	check_files_for_func("bsearch", "NEED_BSEARCH", "include/linux/bsearch.h");
 	check_files_for_func("timer_setup", "NEED_TIMER_SETUP", "include/linux/timer.h");
 	check_files_for_func("__setup_timer", "NEED_SETUP_TIMER", "include/linux/timer.h");
@@ -712,14 +714,14 @@ sub check_other_dependencies()
 	check_files_for_func("fwnode_for_each_child_node", "NEED_FWNODE_FOR_EACH_CHILD_NODE", "include/linux/property.h");
 	check_files_for_func("fwnode_graph_for_each_endpoint", "NEED_FWNODE_GRAPH_FOR_EACH_ENDPOINT", "include/linux/property.h");
 	check_files_for_func("fwnode_graph_get_port_parent", "NEED_FWNODE_GRAPH_GET_PORT_PARENT", "include/linux/property.h");
+	check_files_for_func("fwnode_graph_get_endpoint_by_id", "NEED_FWNODE_GRAPH_GET_ENDPOINT_BY_ID", "include/linux/property.h");
 	check_files_for_func("timer_setup_on_stack", "NEED_TIMER_SETUP_ON_STACK", "include/linux/timer.h");
 	check_files_for_func("time64_to_tm", "NEED_TIME64_TO_TM", "include/linux/time.h");
-	check_files_for_func("READ_ONCE", "NEED_READ_ONCE", "include/linux/compiler.h");
+	check_files_for_func("READ_ONCE", "NEED_READ_ONCE", "include/linux/compiler.h", "include/asm-generic/rwonce.h");
 	check_files_for_func("usb_urb_ep_type_check", "NEED_USB_EP_CHECK", "include/linux/usb.h");
 	check_files_for_func("get_user_pages_longterm", "NEED_GET_USER_PAGES_LONGTERM", "include/linux/mm.h");
 	check_files_for_func("__pfn_to_phys", "NEED_PFN_TO_PHYS", "include/asm-generic/memory_model.h");
-	check_files_for_func("next_pseudo_random32", "NEED_NEXT_PSEUDO_RANDOM32", "include/linux/random.h");
-	check_files_for_func("i2c_new_secondary_device", "NEED_I2C_NEW_SECONDARY_DEV", "include/linux/i2c.h");
+	check_files_for_func("next_pseudo_random32", "NEED_NEXT_PSEUDO_RANDOM32", "include/linux/random.h", "include/linux/prandom.h");
 	check_files_for_func("memdup_user_nul", "NEED_MEMDUP_USER_NUL", "include/linux/string.h");
 	check_files_for_func("STACK_FRAME_NON_STANDARD", "NEED_STACK_FRAME_NON_STANDARD", "include/linux/frame.h");
 	check_files_for_func("pci_free_irq_vectors", "NEED_PCI_FREE_IRQ_VECTORS", "include/linux/pci.h");
@@ -742,6 +744,25 @@ sub check_other_dependencies()
 	check_files_for_func("of_node_name_eq", "NEED_OF_NODE_NAME_EQ", "include/linux/of.h");
 	check_files_for_func("FOLL_LONGTERM", "NEED_FOLL_LONGTERM", "include/linux/mm.h");
 	check_files_for_func("stream_open", "NEED_STREAM_OPEN", "include/linux/fs.h");
+	check_files_for_func("fwnode_property_read_u32_array", "NEED_PROP_READ_U32_ARRAY", "include/linux/property.h");
+	check_files_for_func("fwnode_property_count_u32", "NEED_PROP_COUNT", "include/linux/property.h");
+	check_files_for_func("fwnode_get_name\\(", "NEED_FWNODE_GETNAME", "include/linux/property.h");
+	check_files_for_func("i2c_new_secondary_device", "NEED_I2C_NEW_SECONDARY_DEV", "include/linux/i2c.h");
+	check_files_for_func("^i2c_new_dummy_device", "NEED_I2C_NEW_DUMMY_DEVICE", "include/linux/i2c.h");
+	check_files_for_func("i2c_new_ancillary_device", "NEED_I2C_NEW_ANCILLARY_DEVICE", "include/linux/i2c.h");
+	check_files_for_func("i2c_new_scanned_device", "NEED_I2C_NEW_SCANNED_DEVICE", "include/linux/i2c.h");
+	check_files_for_func("i2c_new_client_device", "NEED_I2C_NEW_CLIENT_DEVICE", "include/linux/i2c.h");
+	check_files_for_func("i2c_client_has_driver", "NEED_I2C_CLIENT_HAS_DRIVER", "include/linux/i2c.h");
+	check_files_for_func("untagged_addr", "NEED_UNTAGGED_ADDR", "include/linux/mm.h");
+	check_files_for_func("compat_ptr_ioctl", "NEED_COMPAT_PTR_IOCTL", "include/linux/fs.h");
+	check_files_for_func("ns_to_timespec64", "NEED_TIMESPEC64", "include/linux/time64.h");
+	check_files_for_func("sizeof_field", "NEED_SIZEOF_FIELD", "include/linux/stddef.h");
+	check_files_for_func("devm_platform_ioremap_resource", "NEED_DEVM_PLATFORM_IOREMAP_RESOURCE", "include/linux/platform_device.h");
+	check_files_for_func("cpu_latency_qos_add_request", "NEED_CPU_LATENCY_QOS", "include/linux/pm_qos.h");
+	check_files_for_func("fwnode_property_present", "NEED_FWNODE_PROPERTY_PRESENT", "include/linux/property.h");
+	check_files_for_func("fwnode_graph_is_endpoint", "NEED_FWNODE_GRAPH_IS_ENDPOINT", "include/linux/property.h");
+	check_files_for_func("fallthrough", "NEED_FALLTHROUGH", "include/linux/compiler_attributes.h");
+	check_files_for_func("sched_set_fifo", "NEED_SCHED_SET_FIFO", "include/linux/sched.h");
 
 	# For tests for uapi-dependent logic
 	check_files_for_func_uapi("usb_endpoint_maxp", "NEED_USB_ENDPOINT_MAXP", "usb/ch9.h");

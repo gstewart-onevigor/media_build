@@ -57,6 +57,7 @@
 #include <linux/input.h>
 #include <linux/init.h>
 #include <linux/idr.h>
+#include <linux/kernel.h>
 #include "../linux/kernel_version.h"
 
 #ifdef RETPOLINE
@@ -256,7 +257,11 @@ static inline int pci_msi_enabled(void)
 #endif
 
 #ifndef KEY_IMAGES
-#define KEY_IMAGES           0x1ba   /* AL Image Browser */
+#define KEY_IMAGES		0x1ba   /* AL Image Browser */
+#endif
+
+#ifndef KEY_FULL_SCREEN
+#define KEY_FULL_SCREEN		0x174   /* AC View Toggle */
 #endif
 
 #ifdef NEED_DEFINE_PCI_DEVICE_TABLE
@@ -1095,7 +1100,6 @@ static inline int __i2c_transfer(struct i2c_adapter *adap, struct i2c_msg *msgs,
 #endif
 
 #ifdef NEED_KSTRTOU16
-#include <linux/kernel.h>
 
 static inline int kstrtou16(const char *s, unsigned int base, u16 *res)
 {
@@ -1109,7 +1113,6 @@ static inline int kstrtou16(const char *s, unsigned int base, u16 *res)
 #endif
 
 #ifdef NEED_KSTRTOUL
-#include <linux/kernel.h>
 
 #define kstrtoul strict_strtoul
 
@@ -2011,9 +2014,11 @@ static inline s64 ktime_ms_delta(const ktime_t later, const ktime_t earlier)
 
 #define of_node_cmp(s1, s2)          strcasecmp((s1), (s2))
 
+#ifndef BIT_ULL
 #define BIT_ULL(nr)        (1ULL << (nr))
 #define BIT_ULL_MASK(nr)   (1ULL << ((nr) % BITS_PER_LONG_LONG))
 #define BIT_ULL_WORD(nr)   ((nr) / BITS_PER_LONG_LONG)
+#endif
 
 #ifdef NEED_DMA_COERCE_MASK
 #include <linux/dma-mapping.h>
@@ -2113,6 +2118,8 @@ static inline struct fwnode_handle *dev_fwnode(struct device *dev)
 static inline int fwnode_graph_parse_endpoint(struct fwnode_handle *fwnode,
                                 struct fwnode_endpoint *endpoint)
 {
+	if (endpoint)
+		endpoint->port = endpoint->id = 0;
 	return 0;
 }
 
@@ -2122,6 +2129,20 @@ static inline void fwnode_handle_get(struct fwnode_handle *fwnode)
 
 static inline void fwnode_handle_put(struct fwnode_handle *fwnode)
 {
+}
+
+#endif
+
+#ifdef NEED_FWNODE_GRAPH_GET_ENDPOINT_BY_ID
+
+#define FWNODE_GRAPH_ENDPOINT_NEXT      BIT(0)
+#define FWNODE_GRAPH_DEVICE_DISABLED    BIT(1)
+
+static inline struct fwnode_handle *
+fwnode_graph_get_endpoint_by_id(const struct fwnode_handle *fwnode,
+                                u32 port, u32 endpoint, unsigned long flags)
+{
+	return NULL;
 }
 
 #endif
@@ -2225,6 +2246,10 @@ static inline unsigned long nsecs_to_jiffies_static(u64 n)
 #define U32_MAX     ((u32)~0U)
 #endif
 
+#ifdef NEED_U16_MAX
+#define U16_MAX     ((u16)~0U)
+#endif
+
 #ifdef NEED_BSEARCH
 static inline void *bsearch(const void *key, const void *base, size_t num, size_t size,
                             int (*cmp)(const void *key, const void *elt))
@@ -2325,6 +2350,46 @@ static inline bool fwnode_device_is_available(struct fwnode_handle *fwnode)
 }
 #endif
 
+#ifdef NEED_PROP_COUNT
+
+#ifdef NEED_PROP_READ_U32_ARRAY
+static inline int fwnode_property_read_u32_array(struct fwnode_handle *fwnode,
+						 const char *propname,
+						 u32 *val, size_t nval)
+{
+	return -ENODATA;
+}
+
+static inline int fwnode_property_read_u64_array(struct fwnode_handle *fwnode,
+						 const char *propnam,
+						 u64 *val, size_t nval)
+{
+	return -ENODATA;
+}
+#else
+#include <linux/property.h>
+#endif
+
+static inline int fwnode_property_count_u32(struct fwnode_handle *fwnode,
+					    const char *propname)
+{
+	return fwnode_property_read_u32_array(fwnode, propname, NULL, 0);
+}
+
+static inline int fwnode_property_count_u64(struct fwnode_handle *fwnode,
+					    const char *propname)
+{
+	return fwnode_property_read_u64_array(fwnode, propname, NULL, 0);
+}
+#endif
+
+#ifdef NEED_FWNODE_GETNAME
+static inline const char *fwnode_get_name(const struct fwnode_handle *fwnode)
+{
+	return "name";
+}
+#endif
+
 #ifdef NEED_TIMER_SETUP_ON_STACK
 #define timer_setup_on_stack(timer, callback, flags)        \
         setup_timer_on_stack((timer), (TIMER_FUNC_TYPE)(callback), (flags))
@@ -2374,31 +2439,6 @@ static inline u32 next_pseudo_random32(u32 seed)
 {
 	return seed * 1664525 + 1013904223;
 }
-#endif
-
-/* of_property_read_u32_index is available since Kernel 3.10. For older Kernels
- * this will not compile */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 10, 0)
-#ifdef NEED_I2C_NEW_SECONDARY_DEV
-#include <linux/i2c.h>
-static inline struct i2c_client *i2c_new_secondary_device(struct i2c_client *client,
-							  const char *name,
-							  u16 default_addr)
-{
-	struct device_node *np = client->dev.of_node;
-	u32 addr = default_addr;
-	int i;
-
-	if (np) {
-		i = of_property_match_string(np, "reg-names", name);
-		if (i >= 0)
-			of_property_read_u32_index(np, "reg", i, &addr);
-	}
-
-	dev_dbg(&client->adapter->dev, "Address for %s : 0x%x\n", name, addr);
-	return i2c_new_dummy(client->adapter, addr);
-}
-#endif
 #endif
 
 #ifdef NEED_MEMDUP_USER_NUL
@@ -2602,6 +2642,8 @@ void ida_free(struct ida *ida, unsigned int id)
 
 #ifdef NEED_I2C_LOCK_BUS
 
+#include <linux/i2c.h>
+
 #define I2C_LOCK_ROOT_ADAPTER 0
 #define I2C_LOCK_SEGMENT      1
 
@@ -2706,6 +2748,152 @@ static inline u8 i2c_8bit_addr_from_msg(const struct i2c_msg *msg)
 
 #ifdef NEED_STREAM_OPEN
 #define stream_open nonseekable_open
+#endif
+
+#ifdef NEED_I2C_NEW_DUMMY_DEVICE
+#define i2c_new_dummy_device(adap, addr) (i2c_new_dummy(adap, addr) ? : (struct i2c_client *)ERR_PTR(-ENODEV))
+#endif
+
+#ifdef NEED_I2C_NEW_ANCILLARY_DEVICE
+#include <linux/i2c.h>
+
+#ifdef NEED_I2C_NEW_SECONDARY_DEV
+static inline struct i2c_client *i2c_new_secondary_device(struct i2c_client *client,
+							  const char *name,
+							  u16 default_addr)
+{
+	struct device_node *np = client->dev.of_node;
+	u32 addr = default_addr;
+	int i;
+
+	if (np) {
+		i = of_property_match_string(np, "reg-names", name);
+		if (i >= 0)
+			of_property_read_u32_index(np, "reg", i, &addr);
+	}
+
+	dev_dbg(&client->adapter->dev, "Address for %s : 0x%x\n", name, addr);
+	return i2c_new_dummy(client->adapter, addr);
+}
+#endif
+
+#define i2c_new_ancillary_device(client, name, addr) \
+	(i2c_new_secondary_device(client, name, addr) ? : (struct i2c_client *)ERR_PTR(-ENODEV))
+#endif
+
+#ifdef NEED_I2C_NEW_CLIENT_DEVICE
+#include <linux/i2c.h>
+static inline struct i2c_client *
+i2c_new_client_device(struct i2c_adapter *adap, struct i2c_board_info const *info)
+{
+	struct i2c_client *ret;
+
+	ret = i2c_new_device(adap, info);
+	return ret ? : ERR_PTR(-ENOMEM);
+}
+#endif
+
+#ifdef NEED_I2C_NEW_SCANNED_DEVICE
+#include <linux/i2c.h>
+static inline struct i2c_client *
+i2c_new_scanned_device(struct i2c_adapter *adap,
+		       struct i2c_board_info *info,
+		       unsigned short const *addr_list,
+		       int (*probe)(struct i2c_adapter *adap, unsigned short addr))
+{
+	struct i2c_client *client;
+
+	client = i2c_new_probed_device(adap, info, addr_list, probe);
+	return client ? : ERR_PTR(-ENOMEM);
+}
+#endif
+
+#ifdef NEED_I2C_CLIENT_HAS_DRIVER
+#include <linux/i2c.h>
+static inline bool i2c_client_has_driver(struct i2c_client *client)
+{
+	return !IS_ERR_OR_NULL(client) && client->dev.driver;
+}
+#endif
+
+#ifdef NEED_UNTAGGED_ADDR
+#define untagged_addr(addr) (addr)
+#endif
+
+#ifdef NEED_COMPAT_PTR_IOCTL
+#ifdef CONFIG_COMPAT
+#include <linux/compat.h>
+
+static inline long compat_ptr_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+{
+        if (!file->f_op->unlocked_ioctl)
+                return -ENOIOCTLCMD;
+
+        return file->f_op->unlocked_ioctl(file, cmd, (unsigned long)compat_ptr(arg));
+}
+#else
+#define compat_ptr_ioctl NULL
+#endif
+#endif
+
+#ifdef NEED_TIMESPEC64
+#define timespec64 timespec
+#define ns_to_timespec64 ns_to_timespec
+#endif
+
+#ifdef NEED_SIZEOF_FIELD
+#define sizeof_field(TYPE, MEMBER) sizeof((((TYPE *)0)->MEMBER))
+#endif
+
+#ifdef NEED_DEVM_PLATFORM_IOREMAP_RESOURCE
+#include <linux/platform_device.h>
+static inline void __iomem *devm_platform_ioremap_resource(struct platform_device *pdev,
+							   unsigned int index)
+{
+        struct resource *res;
+
+        res = platform_get_resource(pdev, IORESOURCE_MEM, index);
+        return devm_ioremap_resource(&pdev->dev, res);
+}
+#endif
+
+#ifdef NEED_CPU_LATENCY_QOS
+#define cpu_latency_qos_add_request(req, val) \
+	pm_qos_add_request((req), PM_QOS_CPU_DMA_LATENCY, (val));
+
+#define cpu_latency_qos_remove_request pm_qos_remove_request
+#endif
+
+#ifdef NEED_FWNODE_PROPERTY_PRESENT
+#define fwnode_property_present(fwnode, propname) 0
+#endif
+
+#ifdef NEED_FWNODE_GRAPH_IS_ENDPOINT
+#define fwnode_graph_is_endpoint(fwnode) fwnode_property_present((fwnode), "remote-endpoint")
+#endif
+
+#ifdef NEED_FALLTHROUGH
+#ifdef __has_attribute
+#if __has_attribute(__fallthrough__)
+# define fallthrough                    __attribute__((__fallthrough__))
+#else
+# define fallthrough                    do {} while (0)  /* fallthrough */
+#endif
+#else
+# define fallthrough                    do {} while (0)  /* fallthrough */
+#endif
+#endif
+
+#ifdef NEED_SCHED_SET_FIFO
+#include <linux/sched.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+#include <uapi/linux/sched/types.h>
+#endif
+static inline void sched_set_fifo(struct task_struct *p)
+{
+	struct sched_param sp = { .sched_priority = 50 };
+	sched_setscheduler(p, SCHED_FIFO, &sp);
+}
 #endif
 
 #endif /*  _COMPAT_H */

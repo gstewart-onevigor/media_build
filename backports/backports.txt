@@ -26,21 +26,39 @@ add pr_fmt.patch
 add debug.patch
 add drx39xxj.patch
 
+[5.7.255]
+add v5.7_mmap_read_lock.patch
+add v5.7_vm_map_ram.patch
+add v5.7_pin_user_pages.patch
+
+[5.6.255]
+add v5.6_pin_user_pages.patch
+add v5.6_const_fb_ops.patch
+add v5.6_pm_runtime_get_if_active.patch
+
+[5.5.255]
+add v5.5_alsa_pcm_api_updates.patch
+add v5.5_memtype_h.patch
+
+[5.4.255]
+add v5.4_revert_spi_transfer.patch
+
 [5.1.255]
 add v5.1_vm_map_pages.patch
+add v5.1_devm_i2c_new_dummy_device.patch
 
 [5.0.255]
 add v5.0_ipu3-cio2.patch
+add v5.0_time32.patch
 
 [4.20.255]
 add v4.20_access_ok.patch
 
 [4.18.255]
 add v4.18_fwnode_args_args.patch
-add v4.18_add_map_atomic.patch
+add v4.18_smiapp_bitops.patch
 
 [4.17.255]
-add v4.17_proc_create_single.patch
 add v4.17_i2c_check_num_msgs.patch
 
 [4.15.255]
@@ -49,10 +67,13 @@ add v4.15_pmdown_time.patch
 [4.14.255]
 add v4.14_saa7146_timer_cast.patch
 add v4.14_module_param_call.patch
+add v4.14_fwnode_handle_get.patch
+delete v4.13_fwnode_graph_get_port_parent.patch
 
 [4.13.255]
 add v4.13_remove_nospec_h.patch
 add v4.13_drmP.patch
+add v4.13_fwnode_graph_get_port_parent.patch
 
 [4.12.255]
 add v4.12_revert_solo6x10_copykerneluser.patch
@@ -68,6 +89,7 @@ add v4.10_refcount.patch
 [4.9.255]
 add v4.9_mm_address.patch
 add v4.9_dvb_net_max_mtu.patch
+add v4.9_probe_new.patch
 
 [4.8.255]
 add v4.8_user_pages_flag.patch
@@ -92,8 +114,10 @@ add v4.5_copy_to_user_warning.patch
 
 [4.4.255]
 add v4.4_gpio_chip_parent.patch
+add v4.4_user_pages_flag.patch
 
 [4.3.255]
+delete v4.4_user_pages_flag.patch
 add v4.3_bt87x_const_fix.patch
 
 [4.2.255]
@@ -125,6 +149,7 @@ add v3.17_remove_bpf_h.patch
 add v3.16_netdev.patch
 add v3.16_wait_on_bit.patch
 add v3.16_void_gpiochip_remove.patch
+add v3.16_drop_pointing_stick.patch
 
 [3.13.255]
 add v3.13_ddbridge_pcimsi.patch
