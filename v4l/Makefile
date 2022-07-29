@@ -91,15 +91,9 @@ ifneq ($(filter $(no-makefile-media-targets), $(MAKECMDGOALS)),)
 	endif
 endif
 
-makefile-mm := 1
-ifeq ("$(wildcard $(obj)/frame_vector.c)","")
-	makefile-mm := 0
-endif
-
 # If version not yet detected, we can't create/have these files yet
 ifeq ($(KERNELRELEASE),)
 	makefile-media := 0
-	makefile-mm := 0
 	dot-config := 0
 endif
 
@@ -110,9 +104,6 @@ endif
 ifeq ($(makefile-media),1)
 -include $(obj)/Makefile.media
 -include $(obj)/Makefile.sound
-endif
-ifeq ($(makefile-mm),1)
--include $(obj)/Makefile.mm
 endif
 
 -include $(obj)/.kconfig.dep
@@ -165,7 +156,7 @@ endif
 
 PWD		:= $(shell pwd)
 DEST		:= /lib/modules/$(KERNELRELEASE)/v4l2
-KDIR26		:= /lib/modules/$(KERNELRELEASE)/kernel/drivers/media
+KDIR26		:= /lib/modules/$(KERNELRELEASE)/updates/extra/media
 
 #################################################
 # Compiler fixup rules
@@ -214,9 +205,6 @@ all:: default
 #################################################
 # installation invocation rules
 INSTALLDEPS :=
-ifeq ($(makefile-mm),1)
-INSTALLDEPS += mm-install
-endif
 ifeq ($(makefile-media),1)
 INSTALLDEPS += media-install
 endif
@@ -299,7 +287,7 @@ card cardlist cardlists::
 clean::
 	@find . -name '*.c' -type l -exec rm '{}' \;
 	@find . -name '*.h' -type l -exec rm '{}' \;
-	-rm -f *~ *.o *.ko .*.o.cmd .*.ko.cmd *.mod.c av7110_firm.h fdump \
+	-rm -f *~ *.o *.ko *.mod *.dwo .*.o.cmd .*.mod.cmd .*.ko.cmd *.mod.c av7110_firm.h fdump \
 		config-compat.h Module.symvers Module.markers modules.order \
 		*.unsigned .*.ko.unsigned.cmd
 	$(MAKE) -C firmware $@

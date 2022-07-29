@@ -1,24 +1,3 @@
-diff --git a/drivers/media/common/videobuf2/videobuf2-memops.c b/drivers/media/common/videobuf2/videobuf2-memops.c
-index 6c029616977f..6e9e05153f4e 100644
---- a/drivers/media/common/videobuf2/videobuf2-memops.c
-+++ b/drivers/media/common/videobuf2/videobuf2-memops.c
-@@ -40,6 +40,7 @@ struct frame_vector *vb2_create_framevec(unsigned long start,
- 	unsigned long first, last;
- 	unsigned long nr;
- 	struct frame_vector *vec;
-+	unsigned int flags = FOLL_FORCE | FOLL_WRITE;
- 
- 	first = start >> PAGE_SHIFT;
- 	last = (start + length - 1) >> PAGE_SHIFT;
-@@ -47,7 +48,7 @@ struct frame_vector *vb2_create_framevec(unsigned long start,
- 	vec = frame_vector_create(nr);
- 	if (!vec)
- 		return ERR_PTR(-ENOMEM);
--	ret = get_vaddr_frames(start & PAGE_MASK, nr, true, true, vec);
-+	ret = get_vaddr_frames(start & PAGE_MASK, nr, flags, vec);
- 	if (ret < 0)
- 		goto out_destroy;
- 	/* We accept only complete set of PFNs */
 diff --git a/drivers/media/pci/ivtv/ivtv-udma.c b/drivers/media/pci/ivtv/ivtv-udma.c
 index 16f4a9364747..b823e0a768d8 100644
 --- a/drivers/media/pci/ivtv/ivtv-udma.c
@@ -55,7 +34,7 @@ index 2019ed26472d..f554184395bc 100644
  
  	if (y_pages != y_dma.page_count || uv_pages != uv_dma.page_count) {
 diff --git a/drivers/media/v4l2-core/videobuf-dma-sg.c b/drivers/media/v4l2-core/videobuf-dma-sg.c
-index 7ec8095d2270..9d003d03cb2d 100644
+index 408dc4145815..8abe973c6fa8 100644
 --- a/drivers/media/v4l2-core/videobuf-dma-sg.c
 +++ b/drivers/media/v4l2-core/videobuf-dma-sg.c
 @@ -153,6 +153,7 @@ static int videobuf_dma_init_user_locked(struct videobuf_dmabuf *dma,
@@ -73,7 +52,7 @@ index 7ec8095d2270..9d003d03cb2d 100644
 +	if (rw == READ)
 +		flags |= FOLL_WRITE;
 +
- 	dprintk(1, "init user [0x%lx+0x%lx => %d pages]\n",
+ 	dprintk(1, "init user [0x%lx+0x%lx => %lu pages]\n",
  		data, size, dma->nr_pages);
  
  	err = get_user_pages(current, current->mm,
