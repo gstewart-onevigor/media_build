@@ -20,11 +20,12 @@ TARDIR += include/dt-bindings/media/
 TARDIR += include/linux/platform_data/media/
 TARFILES += include/linux/mmc/sdio_ids.h
 TARFILES += include/sound/aci.h
+TARFILES += include/linux/usb/uvc.h
 TARFILES += include/uapi/linux/usb/video.h
+
+
 TARFILES += include/linux/via-core.h
 TARFILES += include/linux/ti_wilink_st.h
-TARFILES += include/linux/dma-buf.h
-TARFILES += include/linux/dma-fence.h
 TARFILES += include/linux/of_graph.h
 TARFILES += include/linux/kconfig.h
 TARFILES += include/linux/hdmi.h
@@ -33,6 +34,7 @@ TARFILES += include/trace/events/v4l2.h
 TARFILES += include/trace/events/vb2.h
 TARFILES += include/trace/events/pwc.h
 TARFILES += include/linux/pci_ids.h
+TARFILES += include/linux/atmel-isc-media.h
 
 TARFILES += include/misc/altera.h
 
@@ -50,6 +52,7 @@ TARFILES += include/uapi/linux/v4l2-dv-timings.h
 TARFILES += include/uapi/linux/v4l2-controls.h
 TARFILES += include/uapi/linux/uvcvideo.h
 TARFILES += include/uapi/linux/xilinx-v4l2-controls.h
+TARFILES += include/uapi/linux/ccs.h
 TARFILES += include/uapi/linux/smiapp.h
 TARFILES += include/uapi/linux/v4l2-subdev.h
 TARFILES += include/uapi/linux/v4l2-common.h
@@ -80,7 +83,7 @@ todaytar:
 	-rm -f $(PWD)/$(TODAY_TAR).bz2
 	tar cf $(PWD)/$(TODAY_TAR) -C $(DIR) $(TARFILES)
 	git --git-dir $(DIR)/.git log --pretty=oneline -n3 |sed -r 's,([\x22]),,g; s,([\x25\x5c]),\1\1,g' >git_log
-	perl -e 'while (<>) { $$a=$$1 if (m/^\s*VERSION\s*=\s*(\d+)/); $$b=$$1 if (m/^\s*PATCHLEVEL\s*=\s*(\d+)/); $$c=$$1 if (m/^\s*SUBLEVEL\s*=\s*(\d+)/); } printf "#define V4L2_VERSION %d\n", ((($$a) << 16) + (($$b) << 8) + ($$c))' $(DIR)/Makefile > kernel_version.h
+	perl -e 'while (<>) { $$a=$$1 if (m/^\s*VERSION\s*=\s*(\d+)/); $$b=$$1 if (m/^\s*PATCHLEVEL\s*=\s*(\d+)/); $$c=$$1 if (m/^\s*SUBLEVEL\s*=\s*(\d+)/); } printf "#define V4L2_VERSION %d\n", ((($$a) << 16) + (($$b) << 8) + ($$c > 255 ? 255 : $$c))' $(DIR)/Makefile > kernel_version.h
 	tar rvf $(PWD)/$(TODAY_TAR) git_log kernel_version.h
 
 	for i in $(TARDIR); do \
@@ -99,7 +102,7 @@ tar:
 	-rm -f $(PWD)/linux-media.tar.bz2
 	tar cf $(PWD)/linux-media.tar -C $(DIR) $(TARFILES)
 	git --git-dir $(DIR)/.git log --pretty=oneline -n3 |sed -r 's,([\x22]),,g; s,([\x25\x5c]),\1\1,g' >git_log
-	perl -e 'while (<>) { $$a=$$1 if (m/^\s*VERSION\s*=\s*(\d+)/); $$b=$$1 if (m/^\s*PATCHLEVEL\s*=\s*(\d+)/); $$c=$$1 if (m/^\s*SUBLEVEL\s*=\s*(\d+)/); } printf "#define V4L2_VERSION %d\n", ((($$a) << 16) + (($$b) << 8) + ($$c))' $(DIR)/Makefile > kernel_version.h
+	perl -e 'while (<>) { $$a=$$1 if (m/^\s*VERSION\s*=\s*(\d+)/); $$b=$$1 if (m/^\s*PATCHLEVEL\s*=\s*(\d+)/); $$c=$$1 if (m/^\s*SUBLEVEL\s*=\s*(\d+)/); } printf "#define V4L2_VERSION %d\n", ((($$a) << 16) + (($$b) << 8) + ($$c > 255 ? 255 : $$c))' $(DIR)/Makefile > kernel_version.h
 	tar rvf $(PWD)/linux-media.tar git_log kernel_version.h
 	for i in $(TARDIR); do \
 		if [ "`echo $$i|grep Documentation`" = "" ]; then \
