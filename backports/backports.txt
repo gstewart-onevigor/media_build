@@ -28,6 +28,10 @@ add drx39xxj.patch
 add ccs.patch
 add rc-cec.patch
 
+[6.5.1023]
+add v6.5_pcm_copy.patch
+add v6.5_dvb_math.patch
+
 [6.4.1023]
 add v6.4_pin_user_pages.patch
 
@@ -39,6 +43,7 @@ add v6.3_check_endpoint.patch
 add v6.2_class.patch
 add v6.2_remove.patch
 add v6.2_probe.patch
+add v6.2_probe_tbs.patch
 add v6.2_v4l2-core.patch
 
 [6.1.1023]
